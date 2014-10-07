@@ -28,7 +28,7 @@ def curpath():
     return os.path.split(os.path.realpath(__file__))[0]
 
 def ensure_plantuml_jar():
-    target_path = '%s/plantuml.jar' % (curpath())
+    target_path = os.path.join(curpath(),'plantuml.jar')
     if not os.path.isfile(target_path):
         f = urllib2.urlopen("http://sourceforge.net/projects/plantuml/files/plantuml.jar/download")
         with open(target_path, 'wb') as fout:
@@ -36,8 +36,10 @@ def ensure_plantuml_jar():
 
 def runplantuml(s):
     """Execute plantuml and return a raw SVG image, or None."""
-    cmd = 'java -jar %s/plantuml.jar -Tsvg -p' % curpath()
-    plantuml = Popen(shlex.split(cmd), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    target_path = os.path.join(curpath(),'plantuml.jar')
+    cmd = shlex.split('java -jar %s -Tsvg -p')
+    cmd[2] =  target_path
+    plantuml = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     stdoutdata, stderrdata = plantuml.communicate(s.encode('utf-8'))
 
     status = plantuml.wait()
